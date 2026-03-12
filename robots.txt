@@ -10,7 +10,7 @@ Disallow: /temp/
 Disallow: /*.log$
 
 # Sitemap
-Sitemap: https://www.podlahy-pavlas.cz/sitemap.xml
+Sitemap: https://www.sanacesf.cz/sitemap.xml
 
 # Crawl-delay pro všechny roboty
 Crawl-delay: 1

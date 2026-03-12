@@ -7,7 +7,7 @@ Moderní, responzivní web pro společnost Sanace SF specializující se na extr
 **Firma:** Sanace SF (Josef Pavlas)  
 **IČ:** 19520239  
 **Sídlo:** Libouchec 419, 403 35  
-**Web:** https://www.podlahy-pavlas.cz/  
+**Web:** https://www.sanacesf.cz/  
 **Kontakt:** info@sanacesf.cz, +420 608 300 704  
 
 ### Služby
@@ -218,7 +218,7 @@ Aktualizujte ve všech souborech:
 Po přidání nových stránek upravte `sitemap.xml`:
 ```xml
 <url>
-    <loc>https://www.podlahy-pavlas.cz/nova-stranka.html</loc>
+    <loc>https://www.sanacesf.cz/nova-stranka.html</loc>
     <lastmod>2026-03-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
