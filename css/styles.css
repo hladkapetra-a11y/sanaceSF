@@ -687,6 +687,7 @@ main > *:not(.hero) {
     gap: var(--space-xl);
     align-items: center;
     height: var(--cisteni-fullbleed-img-height-desktop); /* No change */
+    position: relative;
     z-index: 1;
 }
 
