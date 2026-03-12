@@ -3,24 +3,33 @@
 // Load header/footer fragments dynamically so they can be edited in one place.
 async function loadFragments() {
     try {
+        // Natvrdo nastavené cesty od kořene webu
         const headerUrl = '/includes/header.html';
         const footerUrl = '/includes/footer.html';
 
-        const [hRes, fRes] = await Promise.all([fetch(headerUrl), fetch(footerUrl)]);
+        console.log('Zkouším načíst hlavičku z:', headerUrl);
 
-        if (hRes.ok) {
+        const [hRes, fRes] = await Promise.all([
+            fetch(headerUrl).catch(e => console.error('Chyba fetch hlavičky:', e)),
+            fetch(footerUrl).catch(e => console.error('Chyba fetch patičky:', e))
+        ]);
+
+        if (hRes && hRes.ok) {
             const hText = await hRes.text();
             document.body.insertAdjacentHTML('afterbegin', hText);
+            console.log('Hlavička úspěšně vložena');
+        } else {
+            console.error('Hlavička nebyla nalezena (status:', hRes ? hRes.status : 'error', ')');
         }
 
-        if (fRes.ok) {
+        if (fRes && fRes.ok) {
             const fText = await fRes.text();
             document.body.insertAdjacentHTML('beforeend', fText);
         }
 
         return true;
     } catch (err) {
-        console.warn('Failed to load header/footer fragments:', err);
+        console.warn('Kritická chyba při načítání fragmentů:', err);
         return false;
     }
 }
