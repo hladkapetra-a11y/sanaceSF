@@ -13,8 +13,12 @@ async function loadFragments() {
         const basePath = scriptUrl.pathname.replace(/\/js\/main\.js$/, '/') ;
         const base = scriptUrl.origin + basePath;
 
-        const headerUrl = new URL('includes/header.html', base).href;
-        const footerUrl = new URL('includes/footer.html', base).href;
+        const isFile = window.location.protocol === 'file:';
+        const headerPath = isFile ? 'includes/header.html' : 'includes/header';
+        const footerPath = isFile ? 'includes/footer.html' : 'includes/footer';
+        
+        const headerUrl = new URL(headerPath, base).href;
+        const footerUrl = new URL(footerPath, base).href;
 
         const [hRes, fRes] = await Promise.all([fetch(headerUrl), fetch(footerUrl)]);
 
