@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TJD4D29X');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktivní To-Do List: Ladění Webové Stránky</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #faf9f7; color: #2d2a26; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 350px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 400px; } }
+        .checkbox-custom { appearance: none; background-color: #fff; margin: 0; font: inherit; color: currentColor; width: 1.5em; height: 1.5em; border: 2px solid #a8a29e; border-radius: 0.3em; display: grid; place-content: center; transition: all 0.2s ease-in-out; cursor: pointer; }
+        .checkbox-custom::before { content: ""; width: 0.8em; height: 0.8em; transform: scale(0); transition: 120ms transform ease-in-out; box-shadow: inset 1em 1em white; transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
+        .checkbox-custom:checked { background-color: #8b5a2b; border-color: #8b5a2b; }
+        .checkbox-custom:checked::before { transform: scale(1); }
+        .task-row { transition: background-color 0.2s, opacity 0.3s; }
+        .task-row.done { opacity: 0.6; text-decoration: line-through; }
+    </style>
+
+    <!-- Chosen Palette: Warm Neutrals with Amber/Brown Accent (Stone 50, Stone 800, Amber 800) -->
+    <!-- Application Structure Plan: Zvolil jsem strukturu interaktivního dashboardu, protože převádí statický textový to-do list na hravý a gamifikovaný nástroj. Levý panel ukazuje celkový pokrok vizuálně přes Chart.js (radarový graf ukazuje progres v jednotlivých oblastech), pravý panel slouží jako akční centrum pro odškrtávání úkolů. Tato struktura uživateli (vývojáři/klientovi) okamžitě sděluje, jaká část webu vyžaduje nejvíce práce a kde už je hotovo, což maximalizuje efektivitu a orientaci. -->
+    <!-- Visualization & Content Choices: Zvolil jsem Radar Chart (Chart.js na Canvasu), protože dokonale reprezentuje "vyplňování" různých kategorií (sekcí webu). Jakmile uživatel odškrtne úkol (akce: checkbox), Javascript přepočítá procentuální hotovost dané sekce a dynamicky zaktualizuje plochu grafu (interakce). Zajišťuje to vizuální odměnu za vykonanou práci a motivuje k dokončení. Textové seznamy používají strukturované HTML s Tailwind třídami bez použití SVG nebo Mermaid JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="antialiased selection:bg-amber-200 selection:text-amber-900">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TJD4D29X" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <header class="mb-12 text-center max-w-3xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 text-stone-800 tracking-tight">Ladění Homepage: Aktivní Přehled</h1>
+            <p class="text-lg text-stone-600 leading-relaxed">
+                Tento interaktivní dashboard slouží k efektivnímu řízení a vizualizaci úprav webové stránky ("Rychlík"). 
+                Každá sekce webu má své definované úkoly. Jakmile provedete změnu v kódu, odškrtněte si ji zde. 
+                Grafika a ukazatele progresu se dynamicky přizpůsobí, abyste měli neustálý přehled o tom, jak blízko jste k cíli.
+            </p>
+        </header>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 mb-10">
+            <h2 class="text-2xl font-semibold mb-2 text-stone-800">Celkový postup projektu</h2>
+            <p class="text-stone-500 mb-6 text-sm">Sledujte svůj celkový pokrok ladění v reálném čase. Indikátor se plní s každým odškrtnutým bodem.</p>
+            
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-stone-600" id="progress-text-label">Hotovo: 0 ze 26 úkolů</span>
+                <span class="text-2xl font-bold text-amber-700" id="progress-percentage">0%</span>
+            </div>
+            <div class="w-full bg-stone-100 rounded-full h-4 overflow-hidden border border-stone-200">
+                <div id="main-progress-bar" class="bg-amber-600 h-4 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <section class="lg:col-span-5 flex flex-col gap-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 sticky top-6">
+                    <h2 class="text-2xl font-semibold mb-2 text-stone-800">Analýza Dokončení Sekcí</h2>
+                    <p class="text-stone-500 mb-6 text-sm">
+                        Tento radarový graf vizualizuje míru dokončení napříč všemi strukturálními částmi stránky. 
+                        Cílem je plně pokrýt celou plochu grafu. Interaktivní vrcholy odpovídají kategoriím v seznamu.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="progressRadarChart"></canvas>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-stone-100">
+                        <h3 class="text-lg font-semibold text-stone-800 mb-3">Rychlý přehled stavu</h3>
+                        <ul id="quick-stats-list" class="space-y-2 text-sm">
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lg:col-span-7">
+                <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 md:p-8">
+                    <h2 class="text-2xl font-semibold mb-2 text-stone-800">Interaktivní Seznam Úkolů</h2>
+                    <p class="text-stone-500 mb-8 text-sm">
+                        Procházejte jednotlivé kategorie a odškrtávejte položky po jejich zapracování do kódu. 
+                        Kliknutím na řádek označíte úkol jako vyřešený.
+                    </p>
+
+                    <div id="task-list-container" class="space-y-10">
+                    </div>
+                </div>
+            </section>
+            
+        </div>
+    </div>
+
+    <script>
+        const initialTasks = [
+            { id: 'g1', category: '🏗️ Globální nastavení & Rozvržení', text: 'Max šířka obsahu na 1440px nebo 90% šířky (včetně lišty).', done: false },
+            { id: 'g2', category: '🏗️ Globální nastavení & Rozvržení', text: 'Sjednocení zaoblení (border-radius) u tlačítek, boxů a obrázků.', done: false },
+            { id: 'g3', category: '🏗️ Globální nastavení & Rozvržení', text: 'Zvětšit mezery mezi sekcemi (100–120px padding/margin).', done: false },
+            { id: 'g4', category: '🏗️ Globální nastavení & Rozvržení', text: 'Nastavit základní velikost textu (body) na 18px pro celý web.', done: false },
+            { id: 'g5', category: '🏗️ Globální nastavení & Rozvržení', text: 'Použít originální favicon ze složky místo generovaného.', done: false },
+            { id: 'g6', category: '🏗️ Globální nastavení & Rozvržení', text: 'Odstranit cookie lištu (bude se řešit jinde).', done: false },
+
+            { id: 'm1', category: '🔝 Horní lišta (Menu & Logo)', text: 'Zvětšit mírně logo a nastavit proklik na homepage.', done: false },
+            { id: 'm2', category: '🔝 Horní lišta (Menu & Logo)', text: 'Odstranit položku "Domů" z navigace.', done: false },
+            { id: 'm3', category: '🔝 Horní lišta (Menu & Logo)', text: 'Sjednotit barvu hover podtrhávání na hnědou (Nepodtrhávat "Kontakt").', done: false },
+            { id: 'm4', category: '🔝 Horní lišta (Menu & Logo)', text: 'Zarovnat položky navigace do jednoho řádku.', done: false },
+
+            { id: 'h1', category: '🚀 Hero sekce (Úvod)', text: 'Oživit design pro "Wau" efekt, dát více prostoru textu, zmenšit obrázek.', done: false },
+            { id: 'h2', category: '🚀 Hero sekce (Úvod)', text: 'Zvětšit hlavní text v Hero sekci na 19px.', done: false },
+            { id: 'h3', category: '🚀 Hero sekce (Úvod)', text: 'Upravit tlačítko: zmenšit, stejný padding jako jinde, ubrat stín.', done: false },
+            { id: 'h4', category: '🚀 Hero sekce (Úvod)', text: 'Vyměnit fotku s prstem za novou.', done: false },
+
+            { id: 's1', category: '🛠️ Sekce Služby', text: 'Čárky pod nadpisy nastavit pouze na hnědou barvu.', done: false },
+            { id: 's2', category: '🛠️ Sekce Služby', text: 'Dostat všechny 4 boxy služeb vedle sebe na jeden řádek.', done: false },
+            { id: 's3', category: '🛠️ Sekce Služby', text: 'Nadpisy služeb (H3) sjednotit plošně na velikost 20px.', done: false },
+            { id: 's4', category: '🛠️ Sekce Služby', text: 'U textu v boxech zmenšit mezery mezi řádky a nastavit na 18px.', done: false },
+            { id: 's5', category: '🛠️ Sekce Služby', text: 'Tlačítka upravit: modrá barva, stejné zaoblení a padding jako jinde.', done: false },
+
+            { id: 'k1', category: '📞 Kontakt & Formulář', text: 'Oživit sekci přidáním tematického obrázku.', done: false },
+            { id: 'k2', category: '📞 Kontakt & Formulář', text: 'Zvětšit písmo u kontaktního emailu a telefonu.', done: false },
+            { id: 'k3', category: '📞 Kontakt & Formulář', text: 'Vytvořit nový formulář (Jméno, Email/Tel, Lokalita, Služba dropdown, Plocha, Zpráva, Nahrání fota).', done: false },
+            { id: 'k4', category: '📞 Kontakt & Formulář', text: 'Tlačítko formuláře [CHCI CENOVOU NABÍDKU] nesmí splývat (např. bílé s barevným textem).', done: false },
+
+            { id: 'f1', category: '🦶 Patička (Footer)', text: 'Vložit upravené logo Sanace SF (viditelné na černé).', done: false },
+            { id: 'f2', category: '🦶 Patička (Footer)', text: 'Sjednotit barvu podtržení u odkazu Zásady.', done: false },
+            { id: 'f3', category: '🦶 Patička (Footer)', text: 'Zarovnat "Zásady" doprava a "Podpis" doleva na stejný řádek.', done: false }
+        ];
+
+        let state = {
+            tasks: [...initialTasks],
+            categories: []
+        };
+
+        let radarChart;
+
+        function initApp() {
+            state.categories = [...new Set(state.tasks.map(t => t.category))];
+            renderTaskList();
+            initChartJS();
+            updateDashboard();
+        }
+
+        function toggleTask(taskId) {
+            const task = state.tasks.find(t => t.id === taskId);
+            if(task) {
+                task.done = !task.done;
+                updateDashboard();
+                renderTaskList();
+            }
+        }
+
+        function calculateStats() {
+            const total = state.tasks.length;
+            const done = state.tasks.filter(t => t.done).length;
+            const percentage = total === 0 ? 0 : Math.round((done / total) * 100);
+
+            const categoryStats = state.categories.map(cat => {
+                const catTasks = state.tasks.filter(t => t.category === cat);
+                const catDone = catTasks.filter(t => t.done).length;
+                return {
+                    label: cat,
+                    total: catTasks.length,
+                    done: catDone,
+                    percentage: catTasks.length === 0 ? 0 : Math.round((catDone / catTasks.length) * 100)
+                };
+            });
+
+            return { total, done, percentage, categoryStats };
+        }
+
+        function updateDashboard() {
+            const stats = calculateStats();
+            
+            document.getElementById('progress-percentage').innerText = `${stats.percentage}%`;
+            document.getElementById('progress-text-label').innerText = `Hotovo: ${stats.done} ze ${stats.total} úkolů`;
+            document.getElementById('main-progress-bar').style.width = `${stats.percentage}%`;
+
+            if (radarChart) {
+                radarChart.data.datasets[0].data = stats.categoryStats.map(c => c.percentage);
+                radarChart.update();
+            }
+
+            const quickStatsContainer = document.getElementById('quick-stats-list');
+            quickStatsContainer.innerHTML = stats.categoryStats.map(cat => `
+                <li class="flex justify-between items-center p-2 ${cat.percentage === 100 ? 'bg-green-50 text-green-800 font-medium' : 'bg-stone-50'} rounded-lg">
+                    <span class="truncate pr-4">${cat.label.substring(3)}</span>
+                    <span class="bg-white px-2 py-1 rounded-md shadow-sm text-xs font-bold border border-stone-200">${cat.percentage}%</span>
+                </li>
+            `).join('');
+        }
+
+        function renderTaskList() {
+            const container = document.getElementById('task-list-container');
+            container.innerHTML = '';
+
+            state.categories.forEach(cat => {
+                const catTasks = state.tasks.filter(t => t.category === cat);
+                
+                const section = document.createElement('div');
+                section.className = 'mb-8';
+                
+                const header = document.createElement('h3');
+                header.className = 'text-xl font-bold mb-4 text-stone-800 border-b border-stone-200 pb-2 flex items-center justify-between';
+                
+                const catDoneCount = catTasks.filter(t => t.done).length;
+                const isAllDone = catDoneCount === catTasks.length;
+                
+                header.innerHTML = `
+                    <span>${cat}</span>
+                    <span class="text-sm font-medium px-3 py-1 rounded-full ${isAllDone ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500'}">
+                        ${catDoneCount} / ${catTasks.length}
+                    </span>
+                `;
+                section.appendChild(header);
+
+                const list = document.createElement('ul');
+                list.className = 'space-y-3';
+
+                catTasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = `task-row flex items-start gap-4 p-3 rounded-xl border ${task.done ? 'bg-stone-50 border-stone-200 done' : 'bg-white border-stone-200 hover:border-amber-300 hover:shadow-sm cursor-pointer'}`;
+                    
+                    li.innerHTML = `
+                        <div class="flex-shrink-0 pt-1">
+                            <input type="checkbox" class="checkbox-custom" ${task.done ? 'checked' : ''} onchange="toggleTask('${task.id}')" onclick="event.stopPropagation()">
+                        </div>
+                        <div class="flex-grow pt-1.5" onclick="toggleTask('${task.id}')">
+                            <p class="text-stone-800 leading-snug select-none">${task.text}</p>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+
+                section.appendChild(list);
+                container.appendChild(section);
+            });
+        }
+
+        function initChartJS() {
+            const ctx = document.getElementById('progressRadarChart').getContext('2d');
+            const stats = calculateStats();
+            
+            const labelsShort = stats.categoryStats.map(c => {
+                const parts = c.label.split(' ');
+                return parts.length > 2 ? parts[1] + ' ' + parts[2] : parts[1];
+            });
+
+            radarChart = new Chart(ctx, {
+                type: 'polarArea',
+                data: {
+                    labels: labelsShort,
+                    datasets: [{
+                        label: 'Dokončeno (%)',
+                        data: stats.categoryStats.map(c => c.percentage),
+                        backgroundColor: [
+                            'rgba(139, 90, 43, 0.6)',
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(245, 158, 11, 0.6)',
+                            'rgba(139, 92, 246, 0.6)',
+                            'rgba(100, 116, 139, 0.6)'
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20,
+                                backdropColor: 'transparent',
+                                color: '#a8a29e'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                },
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Dokončeno: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true
+                    }
+                }
+            });
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>

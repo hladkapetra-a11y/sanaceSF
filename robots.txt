@@ -1,0 +1,16 @@
+# robots.txt pro Sanace SF
+# Generováno: 28. února 2026
+
+User-agent: *
+Allow: /
+
+# Blokované adresáře
+Disallow: /admin/
+Disallow: /temp/
+Disallow: /*.log$
+
+# Sitemap
+Sitemap: https://www.podlahy-pavlas.cz/sitemap.xml
+
+# Crawl-delay pro všechny roboty
+Crawl-delay: 1

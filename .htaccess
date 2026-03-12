@@ -1,0 +1,62 @@
+# .htaccess for Sanace SF
+# Generated: February 28, 2026
+
+# Custom 404 Error Page
+ErrorDocument 404 /404.html
+
+# Skrýt koncovku .html v URL
+Options -MultiViews
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Přesměruj explicitní požadavky na *.html na URL bez koncovky (301)
+    RewriteCond %{THE_REQUEST} \s/([^\s?]*)\.html[?\s] [NC]
+    RewriteRule ^ /%1 [R=301,L]
+
+    # Pokud neexistuje adresář a existuje soubor s .html, interně přepiš požadavek
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}\.html -f
+    RewriteRule ^(.*?)/?$ $1.html [L]
+</IfModule>
+
+# Security Headers (add these in hosting control panel or server config)
+# Header always set X-Frame-Options "DENY"
+# Header always set X-Content-Type-Options "nosniff"
+# Header always set Referrer-Policy "strict-origin-when-cross-origin"
+# Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+# Header always set Content-Security-Policy "default-src 'self'; font-src 'self' fonts.googleapis.com fonts.gstatic.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; script-src 'self'; img-src 'self' data:; connect-src 'self';"
+
+# Enable compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+
+# Browser Caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/x-javascript "access plus 1 month"
+    ExpiresByType application/x-shockwave-flash "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresDefault "access plus 2 days"
+</IfModule>
+
+# File Protection
+<Files ~ "^\.(htaccess|htpasswd)$">
+    deny from all
+</Files>
