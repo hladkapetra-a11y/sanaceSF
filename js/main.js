@@ -3,22 +3,8 @@
 // Load header/footer fragments dynamically so they can be edited in one place.
 async function loadFragments() {
     try {
-        // Determine base URL from this script's location (robust for nested pages)
-        const scriptSrc = (document.currentScript && document.currentScript.src) || (function(){
-            const s = document.querySelector('script[src$="/js/main.js"], script[src$="js/main.js"]');
-            return s ? s.src : window.location.href;
-        })();
-
-        const scriptUrl = new URL(scriptSrc, window.location.href);
-        const basePath = scriptUrl.pathname.replace(/\/js\/main\.js$/, '/') ;
-        const base = scriptUrl.origin + basePath;
-
-        const isFile = window.location.protocol === 'file:';
-        const headerPath = isFile ? 'includes/header.html' : 'includes/header';
-        const footerPath = isFile ? 'includes/footer.html' : 'includes/footer';
-        
-        const headerUrl = new URL(headerPath, base).href;
-        const footerUrl = new URL(footerPath, base).href;
+        const headerUrl = '/includes/header.html';
+        const footerUrl = '/includes/footer.html';
 
         const [hRes, fRes] = await Promise.all([fetch(headerUrl), fetch(footerUrl)]);
 
