@@ -3,9 +3,11 @@
 // Load header/footer fragments dynamically so they can be edited in one place.
 async function loadFragments() {
     try {
-        // Natvrdo nastavené cesty od kořene webu
-        const headerUrl = '/includes/header.html';
-        const footerUrl = '/includes/footer.html';
+        // Na lokálu běžíme s .html, na serveru voláme URL bez koncovky, abychom se vyhnuli zrádnému 301 přesměrování na HTTP.
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+        const ext = isLocal ? '.html' : '';
+        const headerUrl = '/includes/header' + ext;
+        const footerUrl = '/includes/footer' + ext;
 
         console.log('Zkouším načíst hlavičku z:', headerUrl);
 
