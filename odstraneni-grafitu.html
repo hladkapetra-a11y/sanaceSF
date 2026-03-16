@@ -49,7 +49,11 @@
                     flex: 1; 
                     display: flex; 
                     align-items: center; 
-                    padding: 60px 8%; 
+                    /* Fix pro zarovnání s obsahem webu (container width 90%, max 1440px) */
+                    padding-left: max(5%, calc((100% - 1440px) / 2));
+                    padding-right: 5%;
+                    padding-top: 80px;
+                    padding-bottom: 80px;
                     background: #fff;
                     z-index: 2;
                 }
@@ -129,8 +133,19 @@
 
         <!-- Service Description -->
         <section class="service-description">
+            <style>
+                @media (min-width: 885px) {
+                    /* Upravení poměru šířky: 75% pro text, 25% pro obrázek, případně flex 3:1 */
+                    .graffiti-columns {
+                        display: grid !important;
+                        grid-template-columns: 75% 25% !important;
+                        gap: 40px;
+                        align-items: stretch;
+                    }
+                }
+            </style>
             <div class="container">
-                <div class="content-columns">
+                <div class="content-columns graffiti-columns">
                     <div class="content-main">
                         <h2 class="section-title">Nechte zmizet graffiti jednou provždy</h2>
                         <p>Pohled na&nbsp;posprejovanou fasádu mrzí každého majitele nemovitosti. Neodborné odstraňování ale&nbsp;může napáchat víc škody než užitku – neodpovídající chemie nebo přílišný tlak vody často zanechají na&nbsp;povrchu trvalé mapy nebo poškodí strukturu omítky.</p>
