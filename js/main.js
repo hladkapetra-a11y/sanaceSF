@@ -4,10 +4,13 @@
 async function loadFragments() {
     try {
         // Na lokálu běžíme s .html, na serveru voláme URL bez koncovky, abychom se vyhnuli zrádnému 301 přesměrování na HTTP.
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+        const isFileProtocol = window.location.protocol === 'file:';
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || isFileProtocol;
         const ext = isLocal ? '.html' : '';
-        const headerUrl = '/includes/header' + ext;
-        const footerUrl = '/includes/footer' + ext;
+        const cacheBuster = isFileProtocol ? '' : ('?v=' + new Date().getTime());
+        const basePath = isFileProtocol ? '' : '/';
+        const headerUrl = basePath + 'includes/header' + ext + cacheBuster;
+        const footerUrl = basePath + 'includes/footer' + ext + cacheBuster;
 
         console.log('Zkouším načíst hlavičku z:', headerUrl);
 
