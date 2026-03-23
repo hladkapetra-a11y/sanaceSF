@@ -274,6 +274,13 @@ function initContactForm() {
                 if (response.ok) {
                     showMessage('Zpráva byla úspěšně odeslána. Odpovíme vám do 24 hodin!', 'success');
                     form.reset();
+                    
+                    // GTM custom event pro úspěšné odeslání
+                    window.dataLayer = window.dataLayer || [];
+                    window.dataLayer.push({
+                      'event': 'form_submitted',
+                      'form_name': 'poptavka_sanace'
+                    });
                 } else {
                     throw new Error('Server error');
                 }
